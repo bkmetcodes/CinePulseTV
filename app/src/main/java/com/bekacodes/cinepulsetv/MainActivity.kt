@@ -3,45 +3,31 @@ package com.bekacodes.cinepulsetv
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.tv.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.tv.material3.ExperimentalTvMaterial3Api
-import androidx.tv.material3.Surface
-import com.bekacodes.cinepulsetv.ui.theme.CinePulseTVTheme
+import androidx.activity.viewModels
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bekacodes.cinepulsetv.data.local.CinePulseDatabase
+import com.bekacodes.cinepulsetv.ui.CinePulseTvScreen
+import com.bekacodes.cinepulsetv.ui.CinePulseViewModel
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalTvMaterial3Api::class)
+
+    private val database by lazy { CinePulseDatabase.getInstance(applicationContext) }
+    private val viewModel: CinePulseViewModel by viewModels {
+        CinePulseViewModel.provideFactory(database.dao())
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CinePulseTVTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    shape = RectangleShape
-                ) {
-                    Greeting("Android")
-                }
+            MaterialTheme {
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                CinePulseTvScreen(
+                    uiState = uiState,
+                    onIntent = viewModel::onIntent
+                )
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CinePulseTVTheme {
-        Greeting("Android")
     }
 }
