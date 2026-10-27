@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.androidx.room3.runtime)
     implementation(libs.androidx.tv.foundation)
     implementation(libs.androidx.tv.material)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

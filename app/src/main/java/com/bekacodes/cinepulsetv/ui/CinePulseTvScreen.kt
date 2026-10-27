@@ -1,5 +1,9 @@
 package com.bekacodes.cinepulsetv.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -132,6 +136,22 @@ fun CinePulseTvScreen(
             onSubmit = { onIntent(CinePulseIntent.SubmitVibeSearch) },
             onDismiss = { onIntent(CinePulseIntent.ToggleSearchEditor(false)) }
         )
+    }
+
+    // Full-Screen 10-Foot Video Player + AI Scene X-Ray Overlay
+    AnimatedVisibility(
+        visible = uiState.activePlaybackMovie != null,
+        enter = fadeIn(tween(300)),
+        exit = fadeOut(tween(250))
+    ) {
+        uiState.activePlaybackMovie?.let { playingMovie ->
+            CinePulsePlayerScreen(
+                movie = playingMovie,
+                isXRayOpen = uiState.isXRayOpenInPlayer,
+                onToggleXRay = { open -> onIntent(CinePulseIntent.TogglePlayerXRay(open)) },
+                onClosePlayer = { onIntent(CinePulseIntent.ClosePlayback) }
+            )
+        }
     }
 }
 
