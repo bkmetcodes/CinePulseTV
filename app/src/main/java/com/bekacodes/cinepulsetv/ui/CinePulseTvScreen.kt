@@ -79,6 +79,7 @@ fun CinePulseTvScreen(
                     SpotlightDetails(
                         movie = activeHero,
                         isWatchlisted = activeHero.id in uiState.watchlistIds,
+                        isPlayerOpen = uiState.activePlaybackMovie != null,
                         onPlay = {
                             onIntent(
                                 CinePulseIntent.StartPlayback(

@@ -1,21 +1,20 @@
 package com.bekacodes.cinepulsetv.ui
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.bekacodes.cinepulsetv.data.catalog.CinePulseCatalog
-import com.bekacodes.cinepulsetv.data.local.CinePulseDao
-import com.bekacodes.cinepulsetv.domain.ai.VibeSearchEngine
+import com.bekacodes.cinepulsetv.data.repository.CatalogRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CinePulseViewModel(
-    private val dao: CinePulseDao,
-    private val vibeEngine: VibeSearchEngine = VibeSearchEngine()
+@HiltViewModel
+class CinePulseViewModel @Inject constructor(
+    private val repository: CatalogRepository
 ) : ViewModel() {
 
     private val selectedTabFlow = MutableStateFlow(TvNavTab.HOME)
@@ -23,23 +22,23 @@ class CinePulseViewModel(
         MutableStateFlow("Dark sci-fi thrillers under 2 hours with mind-bending endings")
     private val focusedMovieIdFlow = MutableStateFlow<String?>(null)
 
-    private val _uiState = MutableStateFlow(CinePulseUiState(allMovies = CinePulseCatalog.movies))
+    private val _uiState = MutableStateFlow(CinePulseUiState(allMovies = repository.getCatalogMovies()))
     val uiState: StateFlow<CinePulseUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             combine(
-                dao.observeWatchlistIds(),
+                repository.observeWatchlistIds(),
                 selectedTabFlow,
                 vibeQueryFlow,
                 focusedMovieIdFlow
             ) { watchlistIdList, selectedTab, activeQuery, focusedId ->
                 val watchlistSet = watchlistIdList.toSet()
-                val catalogWithWatchlist = CinePulseCatalog.movies.map { movie ->
+                val catalogWithWatchlist = repository.getCatalogMovies().map { movie ->
                     movie.copy(isInWatchlist = movie.id in watchlistSet)
                 }
 
-                val rankedByVibe = vibeEngine.rankCatalogForVibe(activeQuery, catalogWithWatchlist)
+                val rankedByVibe = repository.rankCatalogForVibe(activeQuery, catalogWithWatchlist)
 
                 val displayedMovies = when (selectedTab) {
                     TvNavTab.WATCHLIST -> catalogWithWatchlist.filter { it.id in watchlistSet }
@@ -103,7 +102,7 @@ class CinePulseViewModel(
 
             is CinePulseIntent.ToggleWatchlist -> {
                 viewModelScope.launch {
-                    dao.toggleWatchlist(intent.movieId)
+                    repository.toggleWatchlist(intent.movieId)
                 }
             }
 
@@ -129,15 +128,5 @@ class CinePulseViewModel(
                 _uiState.update { it.copy(isXRayOpenInPlayer = intent.open) }
             }
         }
-    }
-
-    companion object {
-        fun provideFactory(dao: CinePulseDao): ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return CinePulseViewModel(dao) as T
-                }
-            }
     }
 }

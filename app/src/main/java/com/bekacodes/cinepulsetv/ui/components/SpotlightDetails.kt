@@ -47,6 +47,7 @@ import com.bekacodes.cinepulsetv.ui.theme.TvSurface
 fun SpotlightDetails(
     movie: MovieUiModel,
     isWatchlisted: Boolean,
+    isPlayerOpen: Boolean = false,
     onPlay: () -> Unit,
     onOpenXRay: () -> Unit,
     onToggleWatchlist: () -> Unit
@@ -56,8 +57,11 @@ fun SpotlightDetails(
     var watchlistFocused by remember { mutableStateOf(false) }
     val playFocusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(Unit) {
-        runCatching { playFocusRequester.requestFocus() }
+    // D-Pad Focus Restoration: Smoothly restore focus to primary CTA when returning from video player
+    LaunchedEffect(movie.id, isPlayerOpen) {
+        if (!isPlayerOpen) {
+            runCatching { playFocusRequester.requestFocus() }
+        }
     }
 
     Column(
