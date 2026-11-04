@@ -4,7 +4,7 @@ A widescreen **Android TV (10-foot UI)** streaming discovery and playback applic
 
 <p align="center">
   <!-- Paste your GitHub issue-uploaded GIF URL here -->
-  <img src="https://github.com/user-attachments/assets/YOUR-TV-GIF-ID-HERE" alt="CinePulse TV Demo" width="640"/>
+  <img width="829" height="463" alt="Image" src="https://github.com/user-attachments/assets/31d276d2-af85-4738-846c-e8e1f6bfee52" />
 </p>
 
 ---
